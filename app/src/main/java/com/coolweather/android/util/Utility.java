@@ -3,6 +3,11 @@ package com.coolweather.android.util;
 import android.text.TextUtils;
 
 import com.coolweather.android.ChooseAreaFragment;
+import com.coolweather.android.db.City;
+import com.coolweather.android.db.County;
+import com.coolweather.android.db.Province;
+import com.coolweather.android.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,7 +21,7 @@ public class Utility {
                 JSONArray allProvinces = new JSONArray(response);
                 for (int i=0;i<allProvinces.length();i++){
                     JSONObject provinceObject=allProvinces.getJSONObject(i);
-                    ChooseAreaFragment.Province province=new ChooseAreaFragment.Province();
+                    Province province=new Province();
                     province.setProvinceName(provinceObject.getString("name"));
                     province.setProvinceCode(provinceObject.getInt("id"));
                     province.save();
@@ -34,7 +39,7 @@ public class Utility {
                 JSONArray allCities=new JSONArray(response);
                 for (int i=0;i<allCities.length();i++){
                     JSONObject cityObject=allCities.getJSONObject(i);
-                    ChooseAreaFragment.City city=new ChooseAreaFragment.City();
+                    City city=new City();
                     city.setCityName(cityObject.getString("name"));
                     city.setCityCode(cityObject.getInt("id"));
                     city.setProvinceId(provinceId);
@@ -53,9 +58,9 @@ public class Utility {
                 JSONArray allCounties=new JSONArray(response);
                 for (int i=0;i< allCounties.length();i++){
                     JSONObject cityObject=allCounties.getJSONObject(i);
-                    ChooseAreaFragment.County county=new ChooseAreaFragment.County();
+                    County county=new County();
                     county.setCountyName(cityObject.getString("name"));
-                    county.setCountyCode(cityObject.getInt("id"));
+                    county.setWeatherId(cityObject.getString("weather_id"));
                     county.setCityId(cityId);
                     county.save();
                 }
@@ -66,5 +71,15 @@ public class Utility {
         }
         return false;
     }
-
+public static Weather handleWeatherResponse(String response) {
+    try {
+        JSONObject jsonObject = new JSONObject(response);
+        JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+        String weatherContent = jsonArray.getJSONObject(0).toString();
+        return new Gson().fromJson(weatherContent, Weather.class);
+    } catch (Exception e) {
+        e.getStackTrace();
+    }
+    return null;
+}
 }
